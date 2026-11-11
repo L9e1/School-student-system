@@ -1,0 +1,149 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<c:choose>
+    <c:when test="${book.categoryId > 0}">
+        <c:url var="cancelUrl" value="/category">
+            <c:param name="id" value="${book.categoryId}"/>
+        </c:url>
+    </c:when>
+    <c:otherwise>
+        <c:set var="cancelUrl" value="${ctx}/home"/>
+    </c:otherwise>
+</c:choose>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${mode eq 'edit' ? '编辑图书' : '新增图书'} · 墨卷书阁</title>
+    <link rel="stylesheet" href="${ctx}/assets/css/app.css">
+</head>
+<body>
+<%@ include file="common/header.jspf" %>
+
+<main class="page">
+    <div class="form-page">
+        <nav class="breadcrumb">
+            <a href="${ctx}/home">首页</a>
+            <span class="sep">/</span>
+            <c:if test="${book.categoryId > 0}">
+                <a href="${ctx}/category?id=${book.categoryId}">返回书架</a>
+                <span class="sep">/</span>
+            </c:if>
+            <span>${mode eq 'edit' ? '编辑图书' : '新增图书'}</span>
+        </nav>
+
+        <section class="form-card">
+            <div class="form-head">
+                <span class="kicker">${mode eq 'edit' ? 'EDIT BOOK' : 'NEW BOOK'}</span>
+                <h1>${mode eq 'edit' ? '编辑图书信息' : '上架一本新书'}</h1>
+                <p>书名、作者、板块与价格为必填项，其余信息可以之后再补充。</p>
+            </div>
+
+            <form action="${ctx}/book" method="post" novalidate>
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="id" value="${book.id}">
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="name">书名 <span class="req">*</span></label>
+                        <input class="input ${not empty errors.name ? 'error' : ''}"
+                               id="name" name="name" type="text" maxlength="100"
+                               value="${fn:escapeXml(book.name)}" placeholder="例如：活着" autofocus>
+                        <c:if test="${not empty errors.name}">
+                            <span class="error-text"><c:out value="${errors.name}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="author">作者 <span class="req">*</span></label>
+                        <input class="input ${not empty errors.author ? 'error' : ''}"
+                               id="author" name="author" type="text" maxlength="50"
+                               value="${fn:escapeXml(book.author)}" placeholder="例如：余华">
+                        <c:if test="${not empty errors.author}">
+                            <span class="error-text"><c:out value="${errors.author}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="categoryId">所属板块 <span class="req">*</span></label>
+                        <select class="input ${not empty errors.categoryId ? 'error' : ''}"
+                                id="categoryId" name="categoryId">
+                            <option value="">请选择板块</option>
+                            <c:forEach var="cat" items="${categories}">
+                                <option value="${cat.id}" ${book.categoryId == cat.id ? 'selected' : ''}>
+                                    ${cat.icon} <c:out value="${cat.name}"/>
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <c:if test="${not empty errors.categoryId}">
+                            <span class="error-text"><c:out value="${errors.categoryId}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="isbn">ISBN <span class="hint">选填</span></label>
+                        <input class="input ${not empty errors.isbn ? 'error' : ''}"
+                               id="isbn" name="isbn" type="text" maxlength="30"
+                               value="${fn:escapeXml(book.isbn)}" placeholder="9787506365437">
+                        <c:if test="${not empty errors.isbn}">
+                            <span class="error-text"><c:out value="${errors.isbn}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="publisher">出版社 <span class="hint">选填</span></label>
+                        <input class="input ${not empty errors.publisher ? 'error' : ''}"
+                               id="publisher" name="publisher" type="text" maxlength="80"
+                               value="${fn:escapeXml(book.publisher)}" placeholder="例如：作家出版社">
+                        <c:if test="${not empty errors.publisher}">
+                            <span class="error-text"><c:out value="${errors.publisher}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="price">价格（元） <span class="req">*</span></label>
+                        <input class="input ${not empty errors.price ? 'error' : ''}"
+                               id="price" name="price" type="number" step="0.01" min="0"
+                               value="${book.price}" placeholder="45.00">
+                        <c:if test="${not empty errors.price}">
+                            <span class="error-text"><c:out value="${errors.price}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field">
+                        <label for="stock">库存（册） <span class="req">*</span></label>
+                        <input class="input ${not empty errors.stock ? 'error' : ''}"
+                               id="stock" name="stock" type="number" min="0" step="1"
+                               value="${book.stock}" placeholder="0">
+                        <c:if test="${not empty errors.stock}">
+                            <span class="error-text"><c:out value="${errors.stock}"/></span>
+                        </c:if>
+                    </div>
+
+                    <div class="field field-full">
+                        <label for="description">内容简介 <span class="hint">选填，最多 2000 字</span></label>
+                        <textarea class="textarea ${not empty errors.description ? 'error' : ''}"
+                                  id="description" name="description" maxlength="2000"
+                                  placeholder="用一两句话介绍这本书..."><c:out value="${book.description}"/></textarea>
+                        <c:if test="${not empty errors.description}">
+                            <span class="error-text"><c:out value="${errors.description}"/></span>
+                        </c:if>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <span class="spacer">带 <span class="req">*</span> 的为必填项</span>
+                    <a class="btn btn-ghost" href="${cancelUrl}">取消</a>
+                    <button type="submit" class="btn btn-primary">${mode eq 'edit' ? '保存修改' : '确认上架'}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<%@ include file="common/footer.jspf" %>
+</body>
+</html>
