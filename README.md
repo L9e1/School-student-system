@@ -90,6 +90,7 @@ jspsweb/
 │           ├── jstl-1.2.jar
 │           └── mysql-connector-java-8.0.30.jar
 ├── sql/library_db.sql                # 建库、建表、示例数据
+├── lib/servlet-api.jar               # 仅编译用，不会打进 war
 ├── .idea/                            # IDEA 工程配置
 ├── jspsweb.iml
 └── README.md
@@ -145,7 +146,10 @@ IDEA 已配置好：
 - Web 根目录：`WebContent`（不是空的 `web` 目录）；
 - artifact：`jspsweb:Web exploded`；
 - 部署上下文：`/library`；
-- 编译级别：Java 17。
+- 编译级别：Java 17；
+- `lib/servlet-api.jar` 用于编译，不会部署到 `WEB-INF/lib`。
+
+> `.idea/workspace.xml` 含本机路径，未提交到 GitHub。从仓库克隆后，在 IDEA 里新增一个 **Tomcat 9** 运行配置，部署 `jspsweb:Web exploded`，上下文设为 `/library` 即可。
 
 ### 4. 演示账号
 
